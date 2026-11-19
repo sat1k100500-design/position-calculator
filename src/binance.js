@@ -36,6 +36,29 @@ export function useSymbols() {
   return state;
 }
 
+// Свечи за последние 24 часа (15 минут) для мини-графика.
+export function useKlines(symbol) {
+  const [points, setPoints] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    setPoints([]);
+    const load = () =>
+      fetch(`${REST}/fapi/v1/klines?symbol=${symbol}&interval=15m&limit=96`)
+        .then((r) => r.json())
+        .then((rows) => {
+          if (!cancelled && Array.isArray(rows)) setPoints(rows.map((k) => parseFloat(k[4])));
+        })
+        .catch(() => {});
+    load();
+    const t = setInterval(load, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, [symbol]);
+  return points;
+}
+
 // Живая mark-цена монеты через WebSocket (обновляется раз в секунду).
 export function useMarkPrice(symbol, fallback) {
   const [price, setPrice] = useState(null);
