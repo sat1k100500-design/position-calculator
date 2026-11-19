@@ -23,7 +23,13 @@ export default function App() {
         type="vertical"
         palette="colorful"
         onFinish={(revealed) => setSettled(revealed)}
-        revealedContent={<Calculator onClose={() => { setSettled(false); setOpen(false); }} />}
+        revealedContent={
+          // Пока калькулятор закрыт, обрезаем его по высоте заставки, иначе заставка
+          // растягивается до высоты калькулятора и снизу остаётся пустое поле.
+          <div className={"calc-clip" + (settled ? "" : " closed")}>
+            <Calculator onClose={() => { setSettled(false); setOpen(false); }} />
+          </div>
+        }
         overlay={
           !settled && (
             <div className={"launch" + (open ? " launch--gone" : "")}>
